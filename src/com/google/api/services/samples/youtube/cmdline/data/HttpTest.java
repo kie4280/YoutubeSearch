@@ -215,6 +215,7 @@ public class HttpTest {
                     splitmap.put(pair[0], pair[1]);
                 }
             }
+
             String[] params = splitmap.get("sparams").split(",");
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(splitmap.get("url") + "?");
