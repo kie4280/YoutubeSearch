@@ -200,9 +200,11 @@ public class HttpTest {
             String encoded_s = video.get("url_encoded_fmt_stream_map");
             String decode = null;
             try {
-                decode = URLDecoder.decode(URLDecoder.decode(encoded_s, "UTF-8"), "UTF-8");
+                decode = URLDecoder.decode(URLDecoder.decode(encoded_s, "UTF-8"),
+                        "UTF-8");
+                decode = decode.replaceAll("\\\\u0026", "&");
+                decode = decode.replaceAll(" ", "");
 
-                decode = decode.replaceAll("\\\\u0026| ", "&");
             } catch (UnsupportedEncodingException e1) {
                 e1.printStackTrace();
             }
