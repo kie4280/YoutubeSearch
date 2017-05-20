@@ -7,10 +7,11 @@ import org.jsoup.select.Elements;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -230,6 +231,18 @@ public class HttpTest {
         return null;
     }
 
+    public void runScript() {
+        ScriptEngineManager manager = new ScriptEngineManager();
+        ScriptEngine scriptEngine = manager.getEngineByName("JavaScript");
+        try {
+            scriptEngine.eval(new FileReader(new File("D:\\development\\MyProjects\\IdeaProjects\\java\\YoutubeSearch\\src\\resources\\base.js")));
+        } catch (ScriptException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
     //    https://www.youtube.com/watch?v=ftGQLvUwzjY //vevo
     //    https://www.youtube.com/watch?v=kJQP7kiw5Fk //vevo
     //    https://www.youtube.com/watch?v=h3cDZFEIoB8 //normal
@@ -237,8 +250,9 @@ public class HttpTest {
 
     public static void main(String[] args) {
         HttpTest test = new HttpTest();
-        String result = test.getHTML("https://www.youtube.com/watch?v=xWzlwGVQ6_Q");
-        test.getVideo(result);
+//        String result = test.getHTML("https://www.youtube.com/watch?v=xWzlwGVQ6_Q");
+//        test.getVideo(result);
+        test.runScript();
 
     }
 }
