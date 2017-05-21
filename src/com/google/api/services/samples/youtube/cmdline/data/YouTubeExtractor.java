@@ -37,7 +37,7 @@ public final class YouTubeExtractor {
     //region Constructors
     public YouTubeExtractor(String videoIdentifier) {
         mVideoIdentifier = videoIdentifier;
-        mElFields = new ArrayList<>(asList("embed", "detailpage", "vevo", "youtu.be", ""));
+        mElFields = new ArrayList<>(asList("info", "embed", "detailpage", "vevo", "youtu.be"));
 
         mPreferredVideoQualities = asList(YOUTUBE_VIDEO_QUALITY_HD_1080, YOUTUBE_VIDEO_QUALITY_HD_720,
                 YOUTUBE_VIDEO_QUALITY_MEDIUM_360, YOUTUBE_VIDEO_QUALITY_SMALL_240);
@@ -61,9 +61,9 @@ public final class YouTubeExtractor {
         if (elField.length() > 0) elField = "&el=" + elField;
 
         final String language = "en";//Locale.getDefault().getLanguage();
-        final String sig = "454354343";
 
-        final String link = String.format("https://www.youtube.com/get_video_info?video_id=%s%s&ps=default&eurl=&gl=US&hl=%s&signature=%s", mVideoIdentifier, elField, language, sig); //correct
+
+        final String link = String.format("https://www.youtube.com/get_video_info?video_id=%s%s&ps=default&eurl=&gl=US&hl=%s", mVideoIdentifier, elField, language); //correct
 //        final String link = "https://www.youtube.com/get_video_info?&video_id=" + mVideoIdentifier + "&el=info&ps=default&eurl=&gl=US&hl=en";       //correct too
 
         final ExecutorService executors = Executors.newFixedThreadPool(2);
@@ -100,7 +100,6 @@ public final class YouTubeExtractor {
                     if (mConnection != null) {
 
                     }
-
                     executors.shutdown();
                 }
             }
@@ -231,7 +230,7 @@ public final class YouTubeExtractor {
     //    https://www.youtube.com/watch?v=h3cDZFEIoB8 //normal
     public static void main(String[] args) {
 
-        YouTubeExtractor extractor = new YouTubeExtractor("XEHdhpGxBHs");
+        YouTubeExtractor extractor = new YouTubeExtractor("ftGQLvUwzjY");
         extractor.startExtracting(new YouTubeExtractorListener() {
             @Override
             public void onSuccess(YouTubeExtractorResult result) {
