@@ -73,7 +73,7 @@ public final class YouTubeExtractor {
                     mConnection = new URL(link).openConnection();
                     mConnection.setRequestProperty("Accept-Language", language);
 
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(mConnection.getInputStream()));
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(mConnection.getInputStream()));;
                     StringBuilder builder = new StringBuilder();
                     String line;
 

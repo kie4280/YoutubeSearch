@@ -24,7 +24,7 @@ import static java.util.Arrays.asList;
  * Created by kieChang on 2017/5/12.
  */
 
-public class HttpTest {
+public class HttpTest2 {
     private static final int YOUTUBE_VIDEO_QUALITY_SMALL_240 = 36;
     private static final int YOUTUBE_VIDEO_QUALITY_MEDIUM_360 = 18;
     private static final int YOUTUBE_VIDEO_QUALITY_HD_720 = 22;
@@ -33,7 +33,7 @@ public class HttpTest {
     private List<Integer> mPreferredVideoQualities;
     HttpsURLConnection connection = null;
 
-    public HttpTest() {
+    public HttpTest2() {
         //mElFields = new ArrayList<>(asList("embedded", "detailpage", "vevo", "youtube", ""));
 
         mPreferredVideoQualities = asList(YOUTUBE_VIDEO_QUALITY_HD_1080, YOUTUBE_VIDEO_QUALITY_HD_720,
@@ -123,7 +123,7 @@ public class HttpTest {
         return map;
     }
 
-    private HttpTest.YouTubeExtractorResult getYouTubeResult(String html) throws UnsupportedEncodingException, HttpTest.YouTubeExtractorException {
+    private HttpTest2.YouTubeExtractorResult getYouTubeResult(String html) throws UnsupportedEncodingException, HttpTest2.YouTubeExtractorException {
         HashMap<String, String> video = getQueryMap(html, "UTF-8");
         URI videoURI = null;
 
@@ -167,10 +167,10 @@ public class HttpTest {
             final URI defaultThumbURI = video.containsKey("iurl") ? URI.create(video.get("iurl")) : null;
             final URI standardThumbURI = video.containsKey("iurlsd") ? URI.create(video.get("iurlsd")) : null;
 
-            return new HttpTest.YouTubeExtractorResult(videoURI, mediumThumbURI, highThumbURI, defaultThumbURI, standardThumbURI);
+            return new HttpTest2.YouTubeExtractorResult(videoURI, mediumThumbURI, highThumbURI, defaultThumbURI, standardThumbURI);
         } else {
             try {
-                throw new HttpTest.YouTubeExtractorException("Status: " + video.get("status") + "\nReason: " + video.get("reason") + "\nError code: " + video.get("errorcode"));
+                throw new HttpTest2.YouTubeExtractorException("Status: " + video.get("status") + "\nReason: " + video.get("reason") + "\nError code: " + video.get("errorcode"));
             } catch (YouTubeExtractorException e) {
                 e.printStackTrace();
             }
@@ -274,7 +274,7 @@ public class HttpTest {
     //    https://www.youtube.com/watch?v=xWzlwGVQ6_Q //sem
 
     public static void main(String[] args) {
-        HttpTest test = new HttpTest();
+        HttpTest2 test = new HttpTest2();
         String result = test.getHTML("https://www.youtube.com/watch?v=xWzlwGVQ6_Q");
         test.getVideo(result);
 //        test.runScript();
