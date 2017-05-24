@@ -32,6 +32,7 @@ public class HttpTest2 {
     //private final List<String> mElFields;
     private List<Integer> mPreferredVideoQualities;
     HttpsURLConnection connection = null;
+    JsonObject jsonObj = null;
 
     public HttpTest2() {
         //mElFields = new ArrayList<>(asList("embedded", "detailpage", "vevo", "youtube", ""));
@@ -179,81 +180,76 @@ public class HttpTest2 {
     }
 
     public HashMap<String, String> getVideo(String html) {
-        HashMap<String, String> video = new HashMap<>();
+
+        HashMap<String, String> links = new HashMap<>();
         Document jsoup = Jsoup.parse(html);
-        Elements e = jsoup.body().getElementsByTag("script");
-        Elements q = e.eq(1);
-        String part = q.toString();
+        Elements q = jsoup.body().getElementsByTag("script");
+        Elements j = q.eq(1);
+        String part = j.toString();
         part = part.replaceAll("</?script>", "");
-//        ScriptEngine engine = new ScriptEngineManager().getEngineByName("JavaScript");
-//
-//        try {
-//            engine.eval(part);
-//        } catch (ScriptException e1) {
-//            e1.printStackTrace();
-//        }
         int begin = part.indexOf("ytplayer.config = ");
         int l = 0;
         int r = 0;
         String ytplayer = null;
-        for (int a = begin; a<part.length(); a++) {
+        for (int a = begin; a < part.length(); a++) {
             char i = (char) part.codePointAt(a);
             if (i == '{') {
                 l++;
             } else if (i == '}') {
                 r++;
             }
-            if(r == l && r!=0) {
+            if (r == l && r != 0) {
                 ytplayer = part.substring(begin + 18, a + 1);
                 break;
             }
         }
 
-        String[] s = part.split(",");
-        JsonObject jsonObj = new JsonParser().parse(ytplayer).getAsJsonObject();
+        jsonObj = new JsonParser().parse(ytplayer).getAsJsonObject();
+        String basejsurl = "https://www.youtube.com" + jsonObj.getAsJsonObject("assets")
+                .get("js").getAsString().replaceAll("\"", "");
+        JsonObject video = jsonObj.getAsJsonObject("args");
 
-        for (String i : s) {
-            String[] pair = i.split(":");
-            for (int a = 0; a < pair.length; a++) {
-                pair[a] = pair[a].replaceAll("\"", "");
-            }
-            if (pair.length == 2) {
-                video.put(pair[0], pair[1]);
-            }
-        }
-        if (video.containsKey("url_encoded_fmt_stream_map")) {
-            HashMap<String, String> splitmap = new HashMap<>();
-            String encoded_s = video.get("url_encoded_fmt_stream_map");
-            String decode = null;
-            try {
-                decode = URLDecoder.decode(URLDecoder.decode(encoded_s, "UTF-8"),
-                        "UTF-8");
-                decode = decode.replaceAll("\\\\u0026", "&");
-                decode = decode.replaceAll(" ", "");
 
-            } catch (UnsupportedEncodingException e1) {
-                e1.printStackTrace();
-            }
-            List<String> fields = asList(decode.split("[&\\?;]"));
-            for (String i : fields) {
-                String[] pair = i.split("=");
-                if (pair.length == 2) {
-                    splitmap.put(pair[0], pair[1]);
+        if (video.has("url_encoded_fmt_stream_map")) {
+
+            String encoded_s = video.get("url_encoded_fmt_stream_map").getAsString()
+                    .replaceAll("\"", "");
+            String adaptiveurl = video.get("adaptive_fmts").getAsString()
+                    .replaceAll("\"", "");
+            List<String> videos = asList(encoded_s.split(","));
+            videos.addAll(asList(adaptiveurl.split(",")));
+            for (String e : videos) {
+                String[] fields = e.split("[&\\?;]");
+                HashMap<String, String> splitmap = new HashMap<>();
+                for (String i : fields) {
+                    String[] pair = i.split("=");
+                    if (pair.length == 2) {
+                        splitmap.put(pair[0], pair[1]);
+                    }
                 }
+
+                String[] params = splitmap.get("sparams").split(",");
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append(splitmap.get("url") + "?" + "sparams=" + splitmap.get("sparams"));
+                if (sig) {
+                    String fake = splitmap.get("s");
+
+                } else {
+                    stringBuilder.append("&signature=" + splitmap.get("signature")
+                            + "&key=" + splitmap.get("key"));
+                }
+
+                for (String par : params) {
+                    stringBuilder.append("&" + par + "=" + splitmap.get(par));
+                }
+
+                links.put(splitmap.get("itag"), stringBuilder.toString());
+                System.out.println(stringBuilder.toString());
             }
 
-            String[] params = splitmap.get("sparams").split(",");
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(splitmap.get("url") + "?");
-            stringBuilder.append("sparams=" + splitmap.get("sparams") + "&signature=" + splitmap
-                    .get("signature") + "&key=" + splitmap.get("key"));
-            for (String par : params) {
-                stringBuilder.append("&" + par + "=" + splitmap.get(par));
-            }
 
-            System.out.println(stringBuilder.toString());
         }
-        return null;
+        return links;
     }
 
     public void runScript() {
@@ -266,6 +262,24 @@ public class HttpTest2 {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    private String decode(String encoded_s) {
+        String decode = null;
+        try {
+            decode = URLDecoder.decode(URLDecoder.decode(encoded_s, "UTF-8"),
+                    "UTF-8");
+            decode = decode.replaceAll("\\\\u0026", "&");
+            decode = decode.replaceAll(" ", "");
+
+        } catch (UnsupportedEncodingException e1) {
+            e1.printStackTrace();
+        }
+        return decode;
+    }
+
+    private String decypher() {
+
     }
 
     //    https://www.youtube.com/watch?v=ftGQLvUwzjY //vevo
