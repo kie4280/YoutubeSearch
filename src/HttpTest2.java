@@ -16,6 +16,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -207,18 +208,18 @@ public class HttpTest2 {
         jsonObj = new JsonParser().parse(ytplayer).getAsJsonObject();
         String basejsurl = "https://www.youtube.com" + jsonObj.getAsJsonObject("assets")
                 .get("js").getAsString().replaceAll("\"", "");
-        JsonObject video = jsonObj.getAsJsonObject("args");
+        JsonObject videojson = jsonObj.getAsJsonObject("args");
 
 
-        if (video.has("url_encoded_fmt_stream_map")) {
+        if (videojson.has("url_encoded_fmt_stream_map")) {
 
-            String encoded_s = video.get("url_encoded_fmt_stream_map").getAsString()
-                    .replaceAll("\"", "");
-            String adaptiveurl = video.get("adaptive_fmts").getAsString()
-                    .replaceAll("\"", "");
-            List<String> videos = asList(encoded_s.split(","));
+            String encoded_s = videojson.get("url_encoded_fmt_stream_map").getAsString();
+            String adaptiveurl = videojson.get("adaptive_fmts").getAsString();
+            List<String> videos = new LinkedList<>(asList(encoded_s.split(",")));
             videos.addAll(asList(adaptiveurl.split(",")));
+
             for (String e : videos) {
+                e = decode(e);
                 String[] fields = e.split("[&\\?;]");
                 HashMap<String, String> splitmap = new HashMap<>();
                 for (String i : fields) {
@@ -230,13 +231,14 @@ public class HttpTest2 {
 
                 String[] params = splitmap.get("sparams").split(",");
                 StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append(splitmap.get("url") + "?" + "sparams=" + splitmap.get("sparams"));
-                if (sig) {
+                stringBuilder.append(splitmap.get("url") + "?" + "sparams=" + splitmap.get
+                        ("sparams") + "&key=" + splitmap.get("key"));
+                if (splitmap.containsKey("s")) {
                     String fake = splitmap.get("s");
+                    stringBuilder.append("&signature=" + decypher(basejsurl, fake));
 
                 } else {
-                    stringBuilder.append("&signature=" + splitmap.get("signature")
-                            + "&key=" + splitmap.get("key"));
+                    stringBuilder.append("&signature=" + splitmap.get("signature"));
                 }
 
                 for (String par : params) {
@@ -269,7 +271,7 @@ public class HttpTest2 {
         try {
             decode = URLDecoder.decode(URLDecoder.decode(encoded_s, "UTF-8"),
                     "UTF-8");
-            decode = decode.replaceAll("\\\\u0026", "&");
+            //decode = decode.replaceAll("\\\\u0026", "&");
             decode = decode.replaceAll(" ", "");
 
         } catch (UnsupportedEncodingException e1) {
@@ -278,9 +280,12 @@ public class HttpTest2 {
         return decode;
     }
 
-    private String decypher() {
-
+    private String decypher(String basejsurl, String in) {
+        String out = null;
+        String basejs = getHTML(basejsurl);
+        return out;
     }
+
 
     //    https://www.youtube.com/watch?v=ftGQLvUwzjY //vevo
     //    https://www.youtube.com/watch?v=kJQP7kiw5Fk //vevo
