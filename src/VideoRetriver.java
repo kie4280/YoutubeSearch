@@ -42,8 +42,6 @@ public class VideoRetriver {
 
     public String extractsigfunc() {
         ScriptEngine engine = new ScriptEngineManager().getEngineByName("JavaScript");
-
-        extractjs();
         return null;
     }
 
@@ -215,16 +213,40 @@ public class VideoRetriver {
                 funcname = funcname.substring(funcname.indexOf(",") + 1, funcname.indexOf("("));
             }
         }
-        ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("JavaScript");
-        try {
-            scriptEngine.eval(basejs);
-            Invocable func = (Invocable) scriptEngine;
-            out = (String)func.invokeFunction(funcname, in);
-        } catch (ScriptException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+        String search = String.format("(?x)\n" +
+                "                (?:function\\s+%s|[{;,]\\s*%s\\s*=\\s*function|var\\s+%s\\s*=\\s*function)\\s*\n" +
+                "                \\(([^)]*)\\)\\s*\n" +
+                "                \\{([^}]+)\\}", funcname, funcname, funcname);
+        Pattern pattern = Pattern.compile(search);
+        Matcher matcher = pattern.matcher(basejs);
+        if(matcher.find()) {
+            String res = matcher.group();
+            ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("JavaScript");
+            try {
+                scriptEngine.eval(res);
+                Invocable func = (Invocable) scriptEngine;
+                out = (String)func.invokeFunction(funcname, in);
+            } catch (ScriptException e) {
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            }
         }
+
+
+//        Options options = new Options("nashorn");
+//        options.set("anon.functions", true);
+//        options.set("parse.only", true);
+//        options.set("scripting", true);
+//
+//        ErrorManager errors = new ErrorManager();
+//        Context context = new Context(options, errors, Thread.currentThread().getContextClassLoader());
+//        Source source   = Source.sourceFor("test", "var a = 10; var b = a + 1;" +
+//                "function someFunction() { return b + 1; }  ");
+//        Parser parser = new Parser(context.getEnv(), source, errors);
+//        FunctionNode functionNode = parser.parse();
+//        Block block = functionNode.getBody();
+//        List<Statement> statements = block.getStatements();
 
 
         return out;
