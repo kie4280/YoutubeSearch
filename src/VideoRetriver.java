@@ -233,7 +233,6 @@ public class VideoRetriver {
             }
         }
 
-
 //        Options options = new Options("nashorn");
 //        options.set("anon.functions", true);
 //        options.set("parse.only", true);
