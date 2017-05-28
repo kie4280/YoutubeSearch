@@ -213,9 +213,8 @@ public class VideoRetriver {
                 funcname = funcname.substring(funcname.indexOf(",") + 1, funcname.indexOf("("));
             }
         }
-        String search = String.format("(?x)" +
-                "(?:function\\s+%s|[{;,]\\s*%s\\s*=\\s*function|var\\s+%s\\s*=\\s*function)\\s*\n" +
-                "\\(([^)]*)\\)\\s*\n" +
+        String search = String.format("(?x)(?:function\\s+%s|[{;,]\\s*%s\\s*=\\s*function|var" +
+                "\\s+%s\\s*=\\s*function)\\s*\n\\(([^)]*)\\)\\s*\n" +
                 "\\{([^}]+)\\}", funcname, funcname, funcname);
         Pattern pattern = Pattern.compile(search);
         Matcher matcher = pattern.matcher(basejs);
