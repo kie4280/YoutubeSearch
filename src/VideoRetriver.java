@@ -249,7 +249,6 @@ public class VideoRetriver {
 
             }
 
-
             ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("JavaScript");
             try {
                 scriptEngine.eval(stringBuilder.toString() + res);
