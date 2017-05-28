@@ -246,7 +246,6 @@ public class VideoRetriver {
                     break;
                 }
 
-
             }
 
             ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("JavaScript");
