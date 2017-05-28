@@ -206,26 +206,55 @@ public class VideoRetriver {
         String[] regexes = {"([\"\'])signature\\1\\s*,\\s*([a-zA-Z0-9$]+)\\("};
         String funcname = null;
         for (int a = 0; a < regexes.length; a++) {
-            Pattern pattern = Pattern.compile(regexes[a]);
-            Matcher matcher = pattern.matcher(basejs);
+            Matcher matcher = Pattern.compile(regexes[a]).matcher(basejs);
             if (matcher.find()) {
                 funcname = matcher.group();
                 funcname = funcname.substring(funcname.indexOf(",") + 1, funcname.indexOf("("));
             }
         }
-        String search = String.format("(?x)(?:function\\s+%s|[{;,]\\s*%s\\s*=\\s*function|var" +
-                "\\s+%s\\s*=\\s*function)\\s*\n\\(([^)]*)\\)\\s*\n" +
+        String search1 = String.format("(?x)(?:function\\s+%s|[{;,]\\s*%s\\s*=\\s*function|var" +
+                "\\s+%s\\s*=\\s*function)\\s*\\(([^)]*)\\)\\s*" +
                 "\\{([^}]+)\\}", funcname, funcname, funcname);
-        Pattern pattern = Pattern.compile(search);
-        Matcher matcher = pattern.matcher(basejs);
-        if(matcher.find()) {
-            String res = matcher.group();
-            String[] stmts = res.split(";");
+        Matcher matcher1 = Pattern.compile(search1).matcher(basejs);
+
+        if (matcher1.find()) {
+            String res = matcher1.group();
+            res = res + ";";
+            res = res.replaceFirst(";", "");
+            String temp = res.substring(res.indexOf("{") + 1, res.indexOf("}"));
+            List<String> stmts = asList(temp.split(";"));
+            String varfunc = null;
+            for (String stmt : stmts) {
+                if (!stmt.contains("=")) {
+                    String mems[] = stmt.split("\\.");
+                    varfunc = mems[0];
+                    break;
+                }
+            }
+            StringBuilder stringBuilder = new StringBuilder();
+            int l = 0;
+            int r = 0;
+            for (int p = basejs.indexOf("var " + varfunc + "="); p < basejs.length(); p++) {
+                char a = (char) basejs.codePointAt(p);
+                stringBuilder.append(a);
+                if (a == '{') {
+                    l++;
+                } else if (a == '}') {
+                    r++;
+                }
+                if (r == l && r != 0 && a == ';') {
+                    break;
+                }
+
+
+            }
+
+
             ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("JavaScript");
             try {
-                scriptEngine.eval(res);
+                scriptEngine.eval(stringBuilder.toString() + res);
                 Invocable func = (Invocable) scriptEngine;
-                out = (String)func.invokeFunction(funcname, in);
+                out = (String) func.invokeFunction(funcname, in);
             } catch (ScriptException e) {
                 e.printStackTrace();
             } catch (NoSuchMethodException e) {
