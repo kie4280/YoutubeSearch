@@ -36,7 +36,7 @@ public class VideoRetriver {
 
     public static void main(String[] args) {
         VideoRetriver test = new VideoRetriver();
-        test.getVideo("https://www.youtube.com/watch?v=xWzlwGVQ6_Q");
+        test.getVideo("https://www.youtube.com/watch?v=UtF6Jej8yb4");
 
     }
 
@@ -140,6 +140,7 @@ public class VideoRetriver {
             String adaptiveurl = videojson.get("adaptive_fmts").getAsString();
             List<String> videos = new LinkedList<>(asList(encoded_s.split(",")));
             videos.addAll(asList(adaptiveurl.split(",")));
+            String basejs = downloadWeb(basejsurl);
 
             for (String e : videos) {
                 e = decode(e);
@@ -158,7 +159,7 @@ public class VideoRetriver {
                         ("sparams") + "&key=" + splitmap.get("key"));
                 if (splitmap.containsKey("s")) {
                     String fake = splitmap.get("s");
-                    stringBuilder.append("&signature=" + decipher(basejsurl, fake));
+                    stringBuilder.append("&signature=" + decipher(basejs, fake));
 
                 } else {
                     stringBuilder.append("&signature=" + splitmap.get("signature"));
@@ -191,7 +192,7 @@ public class VideoRetriver {
         return decode;
     }
 
-    private String decipher(String basejsurl, String in) {
+    private String decipher(String basejs, String in) {
         String out = null;
         StringBuilder dumby = new StringBuilder();
         for (int a = 0; a < in.indexOf("."); a++) {
@@ -202,7 +203,7 @@ public class VideoRetriver {
         for (int a = in.indexOf(".") + 1; a < in.length(); a++) {
             dumby.append(in.codePointAt(a));
         }
-        String basejs = downloadWeb(basejsurl);
+
         String[] regexes = {"([\"\'])signature\\1\\s*,\\s*([a-zA-Z0-9$]+)\\("};
         String funcname = null;
         for (int a = 0; a < regexes.length; a++) {
